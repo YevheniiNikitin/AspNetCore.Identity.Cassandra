@@ -1,8 +1,7 @@
-﻿namespace AspNetCore.Identity.Cassandra
+﻿namespace AspNetCore.Identity.Cassandra;
+
+public static class CassandraSessionHelper
 {
-    internal static class CassandraSessionHelper
-    {
-        public static string UsersTableName { get; set; }
-        public static string RolesTableName { get; set; }
-    }
+    public static string? UsersTableName { get; set; }
+    public static string? RolesTableName { get; set; }
 }

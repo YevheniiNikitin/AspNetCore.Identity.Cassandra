@@ -1,16 +1,15 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace IdentitySample.Web.Extensions
+namespace IdentitySample.Web.Extensions;
+
+public static class PageModelExtensions
 {
-    public static class PageModelExtensions
+    public static void AddIdentityErrors(this PageModel pageModel, IdentityResult result)
     {
-        public static void AddIdentityErrors(this PageModel pageModel, IdentityResult result)
+        foreach (var error in result.Errors)
         {
-            foreach (var error in result.Errors)
-            {
-                pageModel.ModelState.AddModelError(string.Empty, error.Description);
-            }
+            pageModel.ModelState.AddModelError(string.Empty, error.Description);
         }
     }
 }

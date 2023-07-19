@@ -9,75 +9,74 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace IdentitySample.Web
+namespace IdentitySample.Web;
+
+public class Startup
 {
-    public class Startup
+    public IConfiguration Configuration { get; private set; }
+    public IWebHostEnvironment Environment { get; private set; }
+
+    public Startup(IConfiguration configuration, IWebHostEnvironment environment)
     {
-        public IConfiguration Configuration { get; private set; }
-        public IWebHostEnvironment Environment { get; private set; }
+        Configuration = configuration;
+        Environment = environment;
+    }
 
-        public Startup(IConfiguration configuration, IWebHostEnvironment environment)
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddOptions();
+
+        services.AddCassandra(Configuration);
+
+        services.AddIdentity<ApplicationUser, ApplicationRole>()
+            .AddCassandraErrorDescriber<CassandraErrorDescriber>()
+            .UseCassandraStores<Cassandra.ISession>()
+            .AddDefaultTokenProviders();
+
+        services.AddHostedService<CassandraIdentityInfrastructureInitializer<ApplicationUser, ApplicationRole>>();
+
+        services.AddRazorPages(options =>
         {
-            Configuration = configuration;
-            Environment = environment;
-        }
+            options.Conventions.AuthorizeFolder("/Account/Manage");
+            options.Conventions.AuthorizePage("/Account/Logout");
+        });
 
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddOptions();
-
-            services.AddCassandra(Configuration);
-
-            services.AddIdentity<ApplicationUser, ApplicationRole>()
-                .AddCassandraErrorDescriber<CassandraErrorDescriber>()
-                .UseCassandraStores<Cassandra.ISession>()
-                .AddDefaultTokenProviders();
-
-            services.AddRazorPages(options =>
+        services.AddAuthentication("myCookie")
+            .AddCookie("myCookie", options =>
             {
-                options.Conventions.AuthorizeFolder("/Account/Manage");
-                options.Conventions.AuthorizePage("/Account/Logout");
+                options.LoginPath = "/Account/Login";
+            })
+            .AddFacebook(o =>
+            {
+                o.AppId = "YOUR APP ID";
+                o.AppSecret = "YOUR APP SECRET";
+                o.SignInScheme = IdentityConstants.ExternalScheme;
             });
 
-            services.AddAuthentication("myCookie")
-                .AddCookie("myCookie", options =>
-                {
-                    options.LoginPath = "/Account/Login";
-                })
-                .AddFacebook(o =>
-                {
-                    o.AppId = "YOUR APP ID";
-                    o.AppSecret = "YOUR APP SECRET";
-                    o.SignInScheme = IdentityConstants.ExternalScheme;
-                });
+        services.AddSingleton<IEmailSender, EmailSender>();
+    }
 
-            services.AddSingleton<IEmailSender, EmailSender>();
-        }
-
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        if (env.IsDevelopment())
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseHsts();
-                app.UseHttpsRedirection();
-            }
-
-            app.UseStaticFiles();
-            app.UseRouting();
-
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapRazorPages();
-            });
-
-            app.UseCassandra<ApplicationUser, ApplicationRole>();
+            app.UseDeveloperExceptionPage();
         }
+        else
+        {
+            app.UseHsts();
+            app.UseHttpsRedirection();
+        }
+
+        app.UseStaticFiles();
+        app.UseRouting();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapRazorPages();
+        });
     }
 }

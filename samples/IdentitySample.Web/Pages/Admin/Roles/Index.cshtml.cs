@@ -9,54 +9,53 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace IdentitySample.Web.Pages.Admin
+namespace IdentitySample.Web.Pages.Admin;
+
+public class RolesModel : PageModel
 {
-    public class RolesModel : PageModel
+    private readonly RoleManager<ApplicationRole> _roleManager;
+
+    public RolesModel(RoleManager<ApplicationRole> roleManager)
     {
-        private readonly RoleManager<ApplicationRole> _roleManager;
+        _roleManager = roleManager;
+    }
 
-        public RolesModel(RoleManager<ApplicationRole> roleManager)
+    [BindProperty]
+    public List<ApplicationRole> Roles { get; set; }
+
+    [TempData]
+    public string StatusMessage { get; set; }
+
+    public async Task OnGetAsync()
+    {
+        Roles = (await _roleManager.Roles.AsCqlQuery().ExecuteAsync()).ToList();
+    }
+
+    public async Task<IActionResult> OnPostDeleteAsync(Guid id)
+    {
+        var role = await _roleManager.FindByIdAsync(id.ToString());
+        IdentityResult result = null;
+
+        var claims = await _roleManager.GetClaimsAsync(role);
+        foreach (var c in claims)
         {
-            _roleManager = roleManager;
-        }
-
-        [BindProperty]
-        public List<ApplicationRole> Roles { get; set; }
-
-        [TempData]
-        public string StatusMessage { get; set; }
-
-        public async Task OnGetAsync()
-        {
-            Roles = (await _roleManager.Roles.AsCqlQuery().ExecuteAsync()).ToList();
-        }
-
-        public async Task<IActionResult> OnPostDeleteAsync(Guid id)
-        {
-            var role = await _roleManager.FindByIdAsync(id.ToString());
-            IdentityResult result = null;
-
-            var claims = await _roleManager.GetClaimsAsync(role);
-            foreach (var c in claims)
-            {
-                result = await _roleManager.RemoveClaimAsync(role, c);
-                if (!result.Succeeded)
-                {
-                    this.AddIdentityErrors(result);
-                    return Page();
-                }
-            }
-
-            result = await _roleManager.DeleteAsync(role);
-
+            result = await _roleManager.RemoveClaimAsync(role, c);
             if (!result.Succeeded)
             {
                 this.AddIdentityErrors(result);
                 return Page();
             }
-
-            StatusMessage = $"Role '{role.Name}' has been deleted.";
-            return RedirectToPage("./Index");
         }
+
+        result = await _roleManager.DeleteAsync(role);
+
+        if (!result.Succeeded)
+        {
+            this.AddIdentityErrors(result);
+            return Page();
+        }
+
+        StatusMessage = $"Role '{role.Name}' has been deleted.";
+        return RedirectToPage("./Index");
     }
 }

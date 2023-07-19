@@ -1,62 +1,61 @@
 ﻿using AspNetCore.Identity.Cassandra.Properties;
 using Microsoft.AspNetCore.Identity;
 
-namespace AspNetCore.Identity.Cassandra
+namespace AspNetCore.Identity.Cassandra;
+
+public class CassandraErrorDescriber
 {
-    public class CassandraErrorDescriber
+    public virtual IdentityError NoHostAvailable()
     {
-        public virtual IdentityError NoHostAvailable()
+        return new IdentityError
         {
-            return new IdentityError()
-            {
-                Code = "NoHostAvailable",
-                Description =  Resources.NoHostAvailable
-            };
-        }
+            Code = "NoHostAvailable",
+            Description =  Resources.NoHostAvailable
+        };
+    }
 
-        public virtual IdentityError Unavailable()
+    public virtual IdentityError Unavailable()
+    {
+        return new IdentityError
         {
-            return new IdentityError()
-            {
-                Code = "Unavailable",
-                Description = Resources.Unavailable
-            };
-        }
+            Code = "Unavailable",
+            Description = Resources.Unavailable
+        };
+    }
 
-        public virtual IdentityError ReadTimeout()
+    public virtual IdentityError ReadTimeout()
+    {
+        return new IdentityError
         {
-            return new IdentityError()
-            {
-                Code = "ReadTimeout",
-                Description = Resources.ReadTimeout
-            };
-        }
+            Code = "ReadTimeout",
+            Description = Resources.ReadTimeout
+        };
+    }
 
-        public virtual IdentityError WriteTimeout()
+    public virtual IdentityError WriteTimeout()
+    {
+        return new IdentityError
         {
-            return new IdentityError()
-            {
-                Code = "WriteTimeout",
-                Description = Resources.WriteTimeout
-            };
-        }
+            Code = "WriteTimeout",
+            Description = Resources.WriteTimeout
+        };
+    }
 
-        public virtual IdentityError QueryValidation()
+    public virtual IdentityError QueryValidation()
+    {
+        return new IdentityError
         {
-            return new IdentityError()
-            {
-                Code = "QueryValidation",
-                Description = Resources.QueryValidation
-            };
-        }
+            Code = "QueryValidation",
+            Description = Resources.QueryValidation
+        };
+    }
 
-        public virtual IdentityError DefaultError(string message)
+    public virtual IdentityError DefaultError(string message)
+    {
+        return new IdentityError
         {
-            return new IdentityError()
-            {
-                Code = "DefaultError",
-                Description = message
-            };
-        }
+            Code = "DefaultError",
+            Description = message
+        };
     }
 }

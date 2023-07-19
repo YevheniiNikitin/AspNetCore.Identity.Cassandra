@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace IdentitySample.Web.Services
+namespace IdentitySample.Web.Services;
+
+public interface IEmailSender
 {
-    public interface IEmailSender
-    {
-        Task SendEmailAsync(string email, string subject, string message);
-    }
+    Task SendEmailAsync(string email, string subject, string message);
 }
