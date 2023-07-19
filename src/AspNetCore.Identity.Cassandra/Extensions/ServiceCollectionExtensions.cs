@@ -44,7 +44,7 @@ public static class ServiceCollectionExtensions
                     .WithQueryOptions(queryOptions)
                     .Build();
 
-                ISession session = null;
+                ISession? session = null;
                 Policy.Handle<SocketException>()
                     .Or<NoHostAvailableException>()
                     .WaitAndRetry(
